@@ -137,6 +137,13 @@
  */
 + (NSArray *) primaryKey; // may be a composite primary key
 /*!
+ @method				queryableColumns
+ @discussion			This method will return the table's queryable columns that can be utilized with the load method.
+ @return				The table's primary key.
+ @updated				2011-04-18
+ */
++ (NSArray *) queryableColumns;
+/*!
  @method				isAutoIncremented
  @discussion			This method returns whether the table's primary key auto-increments.
  @return				Returns whether the table's primary key auto-increments.

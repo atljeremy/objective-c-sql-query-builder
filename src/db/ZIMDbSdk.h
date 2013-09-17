@@ -18,3 +18,5 @@
 
 #import "ZIMDbConnection.h"
 #import "ZIMDbConnectionPool.h"
+#import "ZIMDbMigration.h"
+#import "ZIMSqlMigrateTableStatement.h"

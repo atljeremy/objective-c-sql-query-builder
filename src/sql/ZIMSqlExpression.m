@@ -39,7 +39,7 @@ NSString *ZIMSqlDefaultValue(id value) {
 		[buffer appendString: @"DEFAULT x'"];
 		const unsigned char *dataBuffer = [data bytes];
 		for (int i = 0; i < length; i++) {
-			[buffer appendFormat: @"%02x", (unsigned long)dataBuffer[i]];
+			[buffer appendFormat: @"%02lx", (unsigned long)dataBuffer[i]];
 		}
 		[buffer appendString: @"'"];
 		return buffer;
@@ -203,7 +203,7 @@ NSString *ZIMSqlDataTypeVaryingCharacter(NSUInteger x) {
 	else if ([value isKindOfClass: [NSArray class]]) {
 		NSMutableString *buffer = [[NSMutableString alloc] init];
 		[buffer appendString: @"("];
-		for (int i = 0; i < [value count]; i++) {
+		for (int i = 0; i < [(NSArray*)value count]; i++) {
 			if (i > 0) {
 				[buffer appendString: @", "];
 			}
@@ -228,7 +228,7 @@ NSString *ZIMSqlDataTypeVaryingCharacter(NSUInteger x) {
 		[buffer appendString: @"x'"];
 		const unsigned char *dataBuffer = [data bytes];
 		for (int i = 0; i < length; i++) {
-			[buffer appendFormat: @"%02x", (unsigned long)dataBuffer[i]];
+			[buffer appendFormat: @"%02lx", (unsigned long)dataBuffer[i]];
 		}
 		[buffer appendString: @"'"];
 		return buffer;
@@ -249,7 +249,7 @@ NSString *ZIMSqlDataTypeVaryingCharacter(NSUInteger x) {
 		return statement;
 	}
 	else {
-		@throw [NSException exceptionWithName: @"ZIMSqlException" reason: [NSString stringWithFormat: @"Unable to prepare value. '%@'", value] userInfo: nil];
+		@throw [NSException exceptionWithName: @"ZIMSqlException" reason: [NSString stringWithFormat: @"r. '%@'", value] userInfo: nil];
 	}
 }
 

@@ -141,31 +141,29 @@
 	if ((_delegate != nil) && [_delegate respondsToSelector: @selector(modelWillBeginLoadingRecord:)]) {
 		[_delegate modelWillBeginLoadingRecord: self];
 	}
-	NSArray *primaryKey = [[self class] primaryKey];
-	if ((primaryKey != nil) && ([primaryKey count] > 0)) {
+    
+    NSArray *queryableColumns = [[self class] queryableColumns];
+	if ((queryableColumns != nil) && ([queryableColumns count] > 0)) {
 		ZIMSqlSelectStatement *sql = [[ZIMSqlSelectStatement alloc] init];
 		[sql from: [[self class] table]];
-		for (NSString *column in primaryKey) {
-			id value = [self valueForKey: column];
-			if (value == nil) {
-				@throw [NSException exceptionWithName: @"ZIMOrmException" reason: [NSString stringWithFormat: @"Failed to load record because column '%@' is not assigned a value.", column] userInfo: nil];
-			}
-			[sql where: column operator: ZIMSqlOperatorEqualTo value: value];
+		for (NSString *column in queryableColumns) {
+			id value = [self valueForKey:column];
+            if (value) {
+                [sql where:column operator:ZIMSqlOperatorEqualTo value:value];
+                [sql limit:1];
+            }
 		}
-		[sql limit: 1];
-		NSArray *records = [ZIMDbConnection dataSource: [[self class] dataSource] query: [sql statement]];
-		if ([records count] != 1) {
-			@throw [NSException exceptionWithName: @"ZIMOrmException" reason: @"Failed to load record because the declared primary is invalid." userInfo: nil];
-		}
-		NSDictionary *record = [records objectAtIndex: 0];
-		for (NSString *column in record) {
-			[self setValue: [record valueForKey: column] forKey: column];
-		}
-		_saved = [self hashCode];
+        
+        NSArray *records = [ZIMDbConnection dataSource:[[self class] dataSource] query:[sql statement]];
+        if (records && records.count > 0) {
+            NSDictionary *record = [records objectAtIndex:0];
+            for (NSString *column in record) {
+                [self setValue:[record valueForKey: column] forKey:column];
+            }
+            _saved = [self hashCode];
+        }
 	}
-	else {
-		@throw [NSException exceptionWithName: @"ZIMOrmException" reason: @"Failed to load record because no primary key has been declared." userInfo: nil];
-	}
+    
 	if ((_delegate != nil) && [_delegate respondsToSelector: @selector(modelDidFinishLoadingRecord:)]) {
 		[_delegate modelDidFinishLoadingRecord: self];
 	}
@@ -291,7 +289,11 @@
 }
 
 + (NSArray *) primaryKey {
-	return [NSArray arrayWithObject: @"pk"];
+	return @[@"pk"];
+}
+
++ (NSArray *) queryableColumns {
+    return @[@"pk"];
 }
 
 + (BOOL) isAutoIncremented {
@@ -314,7 +316,7 @@
 		NSString *columnName = [NSString stringWithUTF8String: ivar_getName(var)];
 		if (![configurations containsObject: columnName]) {
 			if ([columnName hasPrefix: @"_"]) {
-				columnName = [columnName substringFromIndex: 1];
+                columnName = [columnName substringFromIndex: 1];
 			}
 			NSString *columnType = [NSString stringWithUTF8String: ivar_getTypeEncoding(var)]; // http://developer.apple.com/library/mac/#documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
 			[columns setObject: columnType forKey: columnName];
